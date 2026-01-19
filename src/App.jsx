@@ -42,6 +42,41 @@ const useScrollAnimation = () => {
   return [ref, isVisible];
 };
 
+// Magnetic Button Component
+const MagneticButton = ({ children, className = "", strength = 0.3 }) => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef(null);
+
+  const handleMouseMove = (e) => {
+    if (!buttonRef.current) return;
+    const { clientX, clientY } = e;
+    const { left, top, width, height } = buttonRef.current.getBoundingClientRect();
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
+    
+    const x = (clientX - centerX) * strength;
+    const y = (clientY - centerY) * strength;
+    
+    setPosition({ x, y });
+  };
+
+  const handleMouseLeave = () => {
+    setPosition({ x: 0, y: 0 });
+  };
+
+  return (
+    <div
+      ref={buttonRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className={`inline-block transition-transform duration-300 ease-out cursor-pointer ${className}`}
+      style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+    >
+      {children}
+    </div>
+  );
+};
+
 const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState(null);
@@ -53,7 +88,48 @@ const App = () => {
   const [uniqueRef, uniqueVisible] = useScrollAnimation();
   const [videoSectionRef, videoSectionVisible] = useScrollAnimation();
   const [rollingRef, rollingVisible] = useScrollAnimation();
+  const [galleryRef, galleryVisible] = useScrollAnimation();
   const [faqRef, faqVisible] = useScrollAnimation();
+
+  // Carousel state
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(true);
+
+  // Gallery images data - original set
+  const galleryImagesBase = [
+    { src: "/asset 10.webp", alt: "Street advertising", caption: "Brand on the Move", location: "Mumbai, Maharashtra" },
+    { src: "/asset 11.webp", alt: "Street advertising", caption: "Urban Impact", location: "Delhi NCR" },
+    { src: "/asset 12.webp", alt: "Street advertising", caption: "Street Presence", location: "Bangalore, Karnataka" },
+    { src: "/asset 13.webp", alt: "Street advertising", caption: "Maximum Visibility", location: "Hyderabad, Telangana" },
+    { src: "/asset 14.webp", alt: "Street advertising", caption: "Rolling Impressions", location: "Chennai, Tamil Nadu" },
+    { src: "/asset 15.webp", alt: "Street advertising", caption: "City Canvas", location: "Pune, Maharashtra" },
+    { src: "/asset 16.webp", alt: "Street advertising", caption: "Traffic Stopper", location: "Kolkata, West Bengal" },
+    { src: "/asset 17.webp", alt: "Street advertising", caption: "Street Level Branding", location: "Ahmedabad, Gujarat" },
+  ];
+
+  // Duplicate images for infinite loop effect
+  const galleryImages = [...galleryImagesBase, ...galleryImagesBase.slice(0, 3)];
+
+  // Auto-play carousel with infinite loop
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCarouselIndex(prev => prev + 1);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Handle infinite loop reset
+  useEffect(() => {
+    if (carouselIndex >= galleryImagesBase.length) {
+      setTimeout(() => {
+        setIsTransitioning(false);
+        setCarouselIndex(0);
+      }, 700);
+      setTimeout(() => {
+        setIsTransitioning(true);
+      }, 750);
+    }
+  }, [carouselIndex]);
 
   const toggleVideo = () => {
     if (videoRef.current) {
@@ -211,11 +287,21 @@ const App = () => {
         .scroll-fade-delay-1 { transition-delay: 0.1s; }
         .scroll-fade-delay-2 { transition-delay: 0.2s; }
         .scroll-fade-delay-3 { transition-delay: 0.3s; }
+        
+        @keyframes scanlines {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(100px); }
+        }
+        
+        @keyframes pulseGlow {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
+        }
       `}</style>
 
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-white border-b-2 border-black h-20 flex items-center justify-between px-6 md:px-12">
-        <div className="font-condensed text-3xl font-black tracking-tighter">
+        <div className="font-condensed text-3xl font-black tracking-tighter cursor-pointer hover:line-through transition-all">
           ADSYUG
         </div>
 
@@ -241,9 +327,11 @@ const App = () => {
           {isMenuOpen ? <X size={32} /> : <Menu size={32} />}
         </button>
 
-        <button className="hidden md:block boxy-border-heavy px-8 py-2 font-condensed font-bold hover:bg-black hover:text-white transition-all uppercase tracking-widest">
-          Book a Fleet
-        </button>
+        <MagneticButton strength={0.2} className="hidden md:block">
+          <button className="boxy-border-heavy px-8 py-2 font-condensed font-bold hover:bg-black hover:text-white transition-all uppercase tracking-widest">
+            Book a Fleet
+          </button>
+        </MagneticButton>
       </nav>
 
       {/* Hero Section */}
@@ -273,40 +361,114 @@ const App = () => {
               <br /> AdsYug turns logistics into legend.
             </p>
             <div className="flex gap-4 hero-fade hero-fade-2">
-              <button className="bg-black text-white px-8 py-4 font-condensed font-bold text-xl uppercase flex items-center gap-3 group hover:bg-zinc-800 transition-colors">
-                Start Rolling{" "}
-                <ArrowRight className="group-hover:translate-x-2 transition-transform" />
-              </button>
+              <MagneticButton strength={0.15}>
+                <button className="bg-black text-white px-8 py-4 font-condensed font-bold text-xl uppercase flex items-center gap-3 group hover:bg-zinc-800 transition-colors">
+                  Start Rolling{" "}
+                  <ArrowRight className="group-hover:translate-x-2 transition-transform" />
+                </button>
+              </MagneticButton>
             </div>
           </div>
         </div>
 
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 border-t-2 border-black hero-fade hero-fade-3">
-          <div className="p-8 border-b-2 md:border-b-0 md:border-r-2 border-black">
-            <span className="font-condensed font-black text-4xl block">
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 border-2 border-black hero-fade hero-fade-3">
+          <div className="p-10 border-b-2 md:border-b-0 md:border-r-2 border-black group hover:bg-black hover:text-white transition-all duration-300 cursor-default">
+            <div className="flex items-center gap-3 mb-2">
+              <Eye className="w-6 h-6 opacity-40 group-hover:text-[#39FF14] transition-colors" />
+              <span className="uppercase text-xs font-bold tracking-[0.2em] opacity-50 group-hover:opacity-100 transition-opacity">
+                Monthly Impressions
+              </span>
+            </div>
+            <span className="font-condensed font-black text-6xl md:text-7xl block group-hover:text-[#39FF14] transition-colors">
               12.4M+
             </span>
-            <span className="uppercase text-sm font-bold opacity-60">
-              Monthly Impressions
-            </span>
           </div>
-          <div className="p-8 border-b-2 md:border-b-0 md:border-r-2 border-black">
-            <span className="font-condensed font-black text-4xl block">
+          <div className="p-10 border-b-2 md:border-b-0 md:border-r-2 border-black group hover:bg-black hover:text-white transition-all duration-300 cursor-default">
+            <div className="flex items-center gap-3 mb-2">
+              <Truck className="w-6 h-6 opacity-40 group-hover:text-[#39FF14] transition-colors" />
+              <span className="uppercase text-xs font-bold tracking-[0.2em] opacity-50 group-hover:opacity-100 transition-opacity">
+                Active Trucks
+              </span>
+            </div>
+            <span className="font-condensed font-black text-6xl md:text-7xl block group-hover:text-[#39FF14] transition-colors">
               450+
             </span>
-            <span className="uppercase text-sm font-bold opacity-60">
-              Active Trucks
-            </span>
           </div>
-          <div className="p-8">
-            <span className="font-condensed font-black text-4xl block">
+          <div className="p-10 group hover:bg-black hover:text-white transition-all duration-300 cursor-default">
+            <div className="flex items-center gap-3 mb-2">
+              <Target className="w-6 h-6 opacity-40 group-hover:text-[#39FF14] transition-colors" />
+              <span className="uppercase text-xs font-bold tracking-[0.2em] opacity-50 group-hover:opacity-100 transition-opacity">
+                Recall Rate
+              </span>
+            </div>
+            <span className="font-condensed font-black text-6xl md:text-7xl block group-hover:text-[#39FF14] transition-colors">
               98%
-            </span>
-            <span className="uppercase text-sm font-bold opacity-60">
-              Recall Rate
             </span>
           </div>
         </div>
+      </section>
+
+      {/* Diagonal Marquee Strips */}
+      <section className="relative py-24 overflow-hidden bg-white">
+        {/* Green Strip - tilted left */}
+        <div 
+          className="absolute left-0 right-0 bg-[#39FF14] py-6 flex items-center whitespace-nowrap"
+          style={{
+            transform: 'rotate(-3deg) translateX(-5%)',
+            width: '110%',
+            top: '15%',
+            boxShadow: '0 8px 30px rgba(57, 255, 20, 0.4)'
+          }}
+        >
+          <div className="marquee-green flex items-center gap-12">
+            {[...Array(12)].map((_, i) => (
+              <span key={i} className="font-condensed text-4xl md:text-5xl lg:text-6xl font-black uppercase text-black tracking-tight flex items-center gap-12">
+                <span>THAT'S ADSYUG!</span>
+                <span className="text-black/50">★</span>
+              </span>
+            ))}
+          </div>
+        </div>
+        
+        {/* Black Strip - tilted right */}
+        <div 
+          className="absolute left-0 right-0 bg-black py-6 flex items-center whitespace-nowrap"
+          style={{
+            transform: 'rotate(3deg) translateX(-5%)',
+            width: '110%',
+            top: '55%',
+            boxShadow: '0 8px 30px rgba(0, 0, 0, 0.5)'
+          }}
+        >
+          <div className="marquee-black flex items-center gap-12">
+            {[...Array(12)].map((_, i) => (
+              <span key={i} className="font-condensed text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white tracking-tight flex items-center gap-12">
+                <span>#FROM STATIC TO FANTASTIC</span>
+                <span className="text-[#39FF14]">★</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Spacer to maintain height */}
+        <div className="h-48 md:h-56"></div>
+        
+        <style>{`
+          @keyframes marqueeGreen {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          @keyframes marqueeBlack {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+          }
+          .marquee-green {
+            animation: marqueeGreen 20s linear infinite;
+          }
+          .marquee-black {
+            animation: marqueeBlack 25s linear infinite;
+          }
+        `}</style>
       </section>
 
       {/* About Us */}
@@ -338,23 +500,66 @@ const App = () => {
               </p>
             </div>
           </div>
-          <div className="relative aspect-square bg-[#111] border border-white/20 p-4 flex items-center justify-center overflow-hidden">
-            {/* Abstract Boxy Graphic */}
-            <div className="absolute inset-0 opacity-20">
-              <div className="grid grid-cols-8 h-full">
-                {[...Array(64)].map((_, i) => (
-                  <div key={i} className="border border-white/10" />
-                ))}
+          {/* Enhanced Image Display with truck-pre.jpg */}
+          <div className={`relative aspect-[4/5] md:aspect-square overflow-hidden group scroll-fade ${aboutVisible ? 'visible' : ''}`} style={{transitionDelay: '0.4s'}}>
+            {/* Glowing border effect */}
+            <div className="absolute -inset-1 bg-gradient-to-br from-[#39FF14]/50 via-[#39FF14]/20 to-transparent blur-sm opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            {/* Main image container */}
+            <div className="relative h-full border-2 border-[#39FF14]/40 overflow-hidden bg-black">
+              {/* The truck image */}
+              <img 
+                src="/truck-pre.jpg" 
+                alt="AdsYug Mobile Billboard Truck"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              
+              {/* Overlay gradients */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+              
+              {/* Animated scanlines effect */}
+              <div className="absolute inset-0 opacity-20 pointer-events-none" style={{
+                backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(57, 255, 20, 0.03) 2px, rgba(57, 255, 20, 0.03) 4px)',
+                animation: 'scanlines 8s linear infinite'
+              }} />
+              
+              {/* Corner accents */}
+              <div className="absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 border-[#39FF14] opacity-80" />
+              <div className="absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 border-[#39FF14] opacity-80" />
+              <div className="absolute bottom-4 left-4 w-12 h-12 border-l-2 border-b-2 border-[#39FF14] opacity-80" />
+              <div className="absolute bottom-4 right-4 w-12 h-12 border-r-2 border-b-2 border-[#39FF14] opacity-80" />
+              
+              {/* Floating stat badges */}
+              <div className="absolute top-6 right-6 bg-black/70 backdrop-blur-sm border border-[#39FF14]/50 px-4 py-2 text-right">
+                <span className="font-condensed text-3xl md:text-4xl font-black text-[#39FF14]">450+</span>
+                <span className="block text-[10px] uppercase tracking-[0.2em] text-white/60">Active Fleet</span>
               </div>
-            </div>
-            <div className="relative z-10 text-center uppercase tracking-widest font-condensed">
-              <Truck size={120} strokeWidth={0.5} className="mx-auto mb-6" />
-              <span className="text-sm font-bold block">
-                Mobile Billboard Technology
-              </span>
-              <span className="text-[10rem] font-black block leading-none">
-                AY
-              </span>
+              
+              <div className="absolute top-20 md:top-24 right-6 bg-black/70 backdrop-blur-sm border border-white/20 px-4 py-2 text-right">
+                <span className="font-condensed text-xl md:text-2xl font-black text-white">50K+</span>
+                <span className="block text-[10px] uppercase tracking-[0.2em] text-white/60">KM Daily</span>
+              </div>
+              
+              {/* Bottom content area */}
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                <div className="flex items-end justify-between">
+                  <div>
+                    <span className="font-condensed text-4xl md:text-5xl font-black text-white tracking-tight">ADSYUG</span>
+                    <span className="block text-xs uppercase tracking-[0.3em] text-[#39FF14] mt-1">Mobile Billboard Network</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-condensed text-5xl md:text-6xl font-black text-white/10">98%</span>
+                    <span className="block text-[10px] uppercase tracking-wider text-white/50 -mt-2">Recall Rate</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Decorative corner lines */}
+              <div className="absolute top-0 left-1/2 w-px h-8 bg-gradient-to-b from-[#39FF14]/60 to-transparent" />
+              <div className="absolute bottom-0 left-1/2 w-px h-8 bg-gradient-to-t from-[#39FF14]/60 to-transparent" />
+              <div className="absolute top-1/2 left-0 h-px w-8 bg-gradient-to-r from-[#39FF14]/60 to-transparent" />
+              <div className="absolute top-1/2 right-0 h-px w-8 bg-gradient-to-l from-[#39FF14]/60 to-transparent" />
             </div>
           </div>
         </div>
@@ -496,34 +701,212 @@ const App = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section ref={faqRef} className="py-24 px-6 md:px-12 bg-zinc-50 border-b-2 border-black">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="font-condensed text-5xl font-black uppercase mb-16 text-center underline underline-offset-[16px] decoration-4">
-            <span className="section-header" style={{display: 'inline-block'}}>
-              <span className={`section-header-text ${faqVisible ? 'visible' : ''}`}>FAQS</span>
+      {/* Gallery Section - Image Carousel with Dynamic Backdrop */}
+      <section ref={galleryRef} className="relative py-24 border-b-2 border-black bg-black overflow-hidden">
+        {/* Dynamic Backdrop Blur */}
+        <div 
+          className="absolute inset-0 opacity-30 transition-all duration-1000 ease-in-out pointer-events-none"
+          style={{
+            backgroundImage: `url(${galleryImages[(carouselIndex + 1) % galleryImages.length].src})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'blur(100px) saturate(2)',
+            transform: 'scale(1.2)'
+          }}
+        />
+
+        <div className="relative z-10 px-6 md:px-12 mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <div>
+            <p className={`uppercase font-bold text-sm tracking-[0.3em] mb-4 text-[#39FF14] scroll-fade ${galleryVisible ? 'visible' : ''}`}>
+              [ See How We Roll ]
+            </p>
+            <h2 className="font-condensed text-5xl md:text-7xl font-black uppercase tracking-tight text-white">
+              <span className="section-header" style={{display: 'inline-block'}}>
+                <span className={`section-header-text ${galleryVisible ? 'visible' : ''}`}>
+                  STRAIGHT FROM THE STREETS
+                </span>
+              </span>
+            </h2>
+          </div>
+          
+          {/* Navigation Arrows */}
+          <div className="flex gap-4">
+            <MagneticButton strength={0.4}>
+              <button 
+                onClick={() => setCarouselIndex(prev => prev === 0 ? galleryImagesBase.length - 1 : prev - 1)}
+                className="w-16 h-16 bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-[#39FF14] hover:text-black hover:border-[#39FF14] transition-all duration-300 group rounded-full"
+              >
+                <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            </MagneticButton>
+            <MagneticButton strength={0.4}>
+              <button 
+                onClick={() => setCarouselIndex(prev => prev + 1)}
+                className="w-16 h-16 bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-[#39FF14] hover:text-black hover:border-[#39FF14] transition-all duration-300 group rounded-full"
+              >
+                <svg className="w-6 h-6 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </MagneticButton>
+          </div>
+        </div>
+        
+        {/* 3-Image Carousel with Center Highlight */}
+        <div className={`relative px-6 md:px-12 py-12 scroll-fade ${galleryVisible ? 'visible' : ''}`} style={{transitionDelay: '0.3s'}}>
+          <div className="overflow-hidden py-8">
+            <div 
+              className={`flex items-end gap-4 md:gap-6 ${isTransitioning ? 'transition-transform duration-700 cubic-bezier(0.22, 1, 0.36, 1)' : ''}`}
+              style={{ transform: `translateX(calc(-${carouselIndex} * (33.333% + 0.5rem)))` }}
+            >
+              {galleryImages.map((img, idx) => {
+                const isMiddle = idx === (carouselIndex + 1);
+                return (
+                  <div 
+                    key={idx} 
+                    className={`min-w-[calc(50%-0.5rem)] md:min-w-[calc(33.333%-1rem)] relative group cursor-pointer transition-all duration-700 ease-out origin-bottom ${
+                      isMiddle ? 'scale-110 z-10 opacity-100' : 'scale-90 opacity-100'
+                    }`}
+                  >
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-sm">
+                      <img 
+                        src={img.src} 
+                        alt={img.alt}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      {/* Overlay on hover or if Middle */}
+                      <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent transition-opacity duration-300 ${
+                        isMiddle ? 'opacity-90' : 'opacity-40'
+                      }`} />
+                      
+                      {/* Image number */}
+                      <div className="absolute top-4 left-4 font-condensed text-white/80 font-bold text-lg">
+                        {String((idx % galleryImagesBase.length) + 1).padStart(2, '0')}
+                      </div>
+                      
+                      {/* Center indicator/icon */}
+                      {isMiddle && (
+                        <div className="absolute top-4 right-4 w-10 h-10 bg-[#39FF14] flex items-center justify-center animate-pulse">
+                          <svg className="w-5 h-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </div>
+                      )}
+                      
+                      {/* Caption - Always visible for middle, subtle for others */}
+                      <div className={`absolute bottom-0 left-0 right-0 p-4 md:p-6 transform transition-all duration-500 ${
+                        isMiddle ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                      }`}>
+                        <p className="font-condensed text-2xl md:text-4xl font-black text-white uppercase tracking-tight">
+                          {img.caption}
+                        </p>
+                        <p className="text-[#39FF14] uppercase text-xs font-bold tracking-[0.2em] mt-2">
+                          {img.location}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* Progress Indicator */}
+          <div className="mt-8 flex items-center gap-4">
+            <div className="flex-1 h-[2px] bg-white/10 overflow-hidden">
+              <div 
+                className="h-full bg-[#39FF14] transition-all duration-500"
+                style={{ width: `${(((carouselIndex % galleryImagesBase.length) + 1) / galleryImagesBase.length) * 100}%` }}
+              />
+            </div>
+            <span className="font-condensed text-white/60 font-bold text-sm">
+              {String((carouselIndex % galleryImagesBase.length) + 1).padStart(2, '0')} / {String(galleryImagesBase.length).padStart(2, '0')}
             </span>
-          </h2>
-          <div className={`border-2 border-black divide-y-2 divide-black scroll-fade ${faqVisible ? 'visible' : ''}`} style={{transitionDelay: '0.2s'}}>
+          </div>
+        </div>
+      </section>
+
+      {/* Enhanced FAQ Section */}
+      <section ref={faqRef} className="py-32 px-6 md:px-12 bg-white relative overflow-hidden border-b-2 border-black">
+        {/* Subtle background element */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#39FF14]/5 opacity-[0.03] rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative z-10">
+      {/* Refined FAQ Section */}
+      <section ref={faqRef} className="pb-32 px-6 md:px-12 bg-white relative overflow-hidden border-b-2 border-black">
+        <div className="relative z-10 w-full">
+          <div className="mb-20">
+            <p className={`uppercase font-bold text-sm tracking-[0.4em] text-[#39FF14] mb-4 scroll-fade ${faqVisible ? 'visible' : ''}`}>
+              [ INTEL & LOGISTICS ]
+            </p>
+            <h2 className="font-condensed text-6xl md:text-8xl font-black uppercase leading-[0.85]">
+              <span className="section-header">
+                <span className={`section-header-text ${faqVisible ? 'visible' : ''}`}>
+                  FREQUENTLY ASKED
+                </span>
+              </span>
+            </h2>
+          </div>
+
+          <div className={`grid grid-cols-1 border-t-2 border-black scroll-fade w-full ${faqVisible ? 'visible' : ''}`} style={{transitionDelay: '0.2s'}}>
             {sections.faqs.map((faq, idx) => (
-              <div key={idx} className="bg-white">
+              <div 
+                key={idx} 
+                className={`group border-b-2 border-black transition-all duration-300 ${
+                  activeFaq === idx ? 'bg-black text-white' : 'bg-white hover:bg-black hover:text-white'
+                }`}
+              >
                 <button
-                  className="w-full p-8 flex justify-between items-center text-left hover:bg-black hover:text-white transition-colors group"
+                  className="w-full p-8 md:p-12 flex items-start gap-8 text-left"
                   onClick={() => toggleFaq(idx)}
                 >
-                  <span className="font-condensed text-2xl font-black uppercase tracking-tight">
-                    {faq.q}
+                  <span className={`font-condensed text-4xl font-black transition-colors duration-300 ${activeFaq === idx ? 'text-[#39FF14]' : 'text-black/20 group-hover:text-white/40'}`}>
+                    {String(idx + 1).padStart(2, '0')}
                   </span>
-                  {activeFaq === idx ? <Minus /> : <Plus />}
-                </button>
-                {activeFaq === idx && (
-                  <div className="p-8 pt-0 border-t-2 border-black bg-white text-black">
-                    <p className="text-lg leading-relaxed">{faq.a}</p>
+                  
+                  <div className="flex-1 pt-1">
+                    <div className="flex justify-between items-center gap-6">
+                      <h3 className="font-condensed text-2xl md:text-4xl font-black uppercase tracking-tight">
+                        {faq.q}
+                      </h3>
+                      <div className={`flex-shrink-0 w-12 h-12 border-2 flex items-center justify-center transition-all duration-500 ${activeFaq === idx ? 'bg-[#39FF14] text-black border-[#39FF14] rotate-180' : 'bg-transparent text-black border-black group-hover:bg-white group-hover:text-black group-hover:border-white'}`}>
+                        {activeFaq === idx ? <Minus size={24} /> : <Plus size={24} />}
+                      </div>
+                    </div>
+                    
+                    <div className={`overflow-hidden transition-all duration-500 ease-in-out ${activeFaq === idx ? 'max-h-[500px] opacity-100 mt-10' : 'max-h-0 opacity-0'}`}>
+                      <div className="max-w-4xl">
+                        <p className={`text-xl md:text-2xl font-light leading-relaxed transition-colors ${activeFaq === idx ? 'text-white/80' : 'text-zinc-600 group-hover:text-white/80'}`}>
+                          {faq.a}
+                        </p>
+                        <div className="mt-10 flex items-center gap-4">
+                          <div className="w-12 h-1 bg-[#39FF14]" />
+                          <span className={`text-[10px] uppercase font-bold tracking-[0.3em] transition-colors ${activeFaq === idx ? 'text-white/40' : 'text-black/40 group-hover:text-white/40'}`}>Technical Documentation v1.0</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                )}
+                </button>
               </div>
             ))}
           </div>
+
+          <div className="mt-20 p-12 border-2 border-black flex flex-col md:flex-row items-center justify-between gap-8 group transition-colors w-full">
+            <div>
+              <h4 className="font-condensed text-3xl md:text-5xl font-black uppercase mb-2">Ready to start rolling?</h4>
+              <p className="text-zinc-500 uppercase text-sm font-bold tracking-widest">Connect with our fleet specialists for a custom campaign proposal.</p>
+            </div>
+            <MagneticButton strength={0.2}>
+              <button className="bg-black text-white px-12 py-6 font-condensed font-bold text-2xl uppercase tracking-widest hover:bg-[#39FF14] hover:text-black transition-all flex items-center gap-4">
+                Contact Specialist <ArrowRight size={24} />
+              </button>
+            </MagneticButton>
+          </div>
+        </div>
+      </section>
         </div>
       </section>
 
@@ -534,7 +917,7 @@ const App = () => {
       >
         <div className="grid grid-cols-1 md:grid-cols-12 gap-16 mb-24">
           <div className="md:col-span-5 space-y-8">
-            <h2 className="font-condensed text-7xl font-black uppercase leading-none tracking-tighter">
+            <h2 className="font-condensed text-7xl font-black uppercase leading-none tracking-tighter cursor-pointer hover:line-through transition-all">
               ADSYUG
             </h2>
             <p className="text-xl font-light opacity-60 uppercase tracking-widest leading-snug">
@@ -601,9 +984,11 @@ const App = () => {
                 placeholder="EMAIL@DOMAIN.COM"
                 className="bg-transparent px-4 py-2 w-full focus:outline-none font-condensed uppercase font-bold text-sm"
               />
-              <button className="bg-white text-black px-4 py-2 hover:bg-zinc-200 transition-colors">
-                <ArrowRight size={20} />
-              </button>
+              <MagneticButton strength={0.4}>
+                <button className="bg-white text-black px-4 py-2 hover:bg-zinc-200 transition-colors">
+                  <ArrowRight size={20} />
+                </button>
+              </MagneticButton>
             </div>
           </div>
         </div>
