@@ -300,22 +300,22 @@ const App = () => {
       `}</style>
 
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-white border-b-2 border-black h-20 flex items-center justify-between px-6 md:px-12">
-        <div className="font-condensed text-3xl font-black tracking-tighter cursor-pointer hover:line-through transition-all">
+      <nav role="navigation" aria-label="Main navigation" className="fixed top-0 w-full z-50 bg-white border-b-2 border-black h-20 flex items-center justify-between px-6 md:px-12">
+        <a href="#" className="font-condensed text-3xl font-black tracking-tighter cursor-pointer hover:line-through transition-all" aria-label="AdsYug - Go to homepage">
           ADSYUG
-        </div>
+        </a>
 
-        <div className="hidden md:flex gap-10 font-condensed text-lg font-bold tracking-wide">
-          <a href="#about" className="hover:line-through transition-all">
+        <div className="hidden md:flex gap-10 font-condensed text-lg font-bold tracking-wide" role="menubar">
+          <a href="#about" className="hover:line-through transition-all" role="menuitem">
             ABOUT
           </a>
-          <a href="#unique" className="hover:line-through transition-all">
+          <a href="#unique" className="hover:line-through transition-all" role="menuitem">
             FEATURES
           </a>
-          <a href="#rolling" className="hover:line-through transition-all">
+          <a href="#rolling" className="hover:line-through transition-all" role="menuitem">
             INSIGHTS
           </a>
-          <a href="#contact" className="hover:line-through transition-all">
+          <a href="#contact" className="hover:line-through transition-all" role="menuitem">
             CONTACT
           </a>
         </div>
@@ -323,8 +323,11 @@ const App = () => {
         <button
           className="md:hidden"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-menu"
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         >
-          {isMenuOpen ? <X size={32} /> : <Menu size={32} />}
+          {isMenuOpen ? <X size={32} aria-hidden="true" /> : <Menu size={32} aria-hidden="true" />}
         </button>
 
         <MagneticButton strength={0.2} className="hidden md:block">
@@ -335,7 +338,7 @@ const App = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 md:pt-48 pb-20 px-6 md:px-12 min-h-screen flex flex-col justify-center">
+      <section aria-labelledby="hero-heading" className="pt-32 md:pt-48 pb-20 px-6 md:px-12 min-h-screen flex flex-col justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
           <div className="lg:col-span-8">
             <h1 className="font-condensed text-7xl md:text-[12rem] font-black leading-[0.85] uppercase tracking-tighter">
@@ -525,10 +528,10 @@ const App = () => {
               }} />
               
               {/* Corner accents */}
-              <div className="absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 border-[#39FF14] opacity-80" />
-              <div className="absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 border-[#39FF14] opacity-80" />
-              <div className="absolute bottom-4 left-4 w-12 h-12 border-l-2 border-b-2 border-[#39FF14] opacity-80" />
-              <div className="absolute bottom-4 right-4 w-12 h-12 border-r-2 border-b-2 border-[#39FF14] opacity-80" />
+              <div className="absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 border-[#39FF14] opacity-80" aria-hidden="true" />
+              <div className="absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 border-[#39FF14] opacity-80" aria-hidden="true" />
+              <div className="absolute bottom-4 left-4 w-12 h-12 border-l-2 border-b-2 border-[#39FF14] opacity-80" aria-hidden="true" />
+              <div className="absolute bottom-4 right-4 w-12 h-12 border-r-2 border-b-2 border-[#39FF14] opacity-80" aria-hidden="true" />
               
               {/* Floating stat badges */}
               <div className="absolute top-6 right-6 bg-black/70 backdrop-blur-sm border border-[#39FF14]/50 px-4 py-2 text-right">
@@ -605,7 +608,7 @@ const App = () => {
       </section>
 
       {/* Full Screen Video Section */}
-      <section ref={videoSectionRef} className="relative h-[80vh] bg-black overflow-hidden">
+      <section ref={videoSectionRef} aria-label="Company showreel video" className="relative h-[80vh] bg-black overflow-hidden">
         <video
           className="absolute inset-0 w-full h-full object-cover"
           src="/video-asset.mp4"
@@ -613,6 +616,7 @@ const App = () => {
           loop
           muted
           playsInline
+          aria-label="AdsYug promotional video showing mobile billboards in action"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end justify-center pb-16">
           <div className="text-center">
@@ -829,14 +833,11 @@ const App = () => {
         </div>
       </section>
 
-      {/* Enhanced FAQ Section */}
-      <section ref={faqRef} className="py-32 px-6 md:px-12 bg-white relative overflow-hidden border-b-2 border-black">
+      {/* FAQ Section */}
+      <section ref={faqRef} id="faq" aria-labelledby="faq-heading" className="py-32 px-6 md:px-12 bg-white relative overflow-hidden border-b-2 border-black">
         {/* Subtle background element */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#39FF14]/5 opacity-[0.03] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#39FF14]/5 opacity-[0.03] rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
         
-        <div className="relative z-10">
-      {/* Refined FAQ Section */}
-      <section ref={faqRef} className="pb-32 px-6 md:px-12 bg-white relative overflow-hidden border-b-2 border-black">
         <div className="relative z-10 w-full">
           <div className="mb-20">
             <p className={`uppercase font-bold text-sm tracking-[0.4em] text-[#39FF14] mb-4 scroll-fade ${faqVisible ? 'visible' : ''}`}>
@@ -905,8 +906,6 @@ const App = () => {
               </button>
             </MagneticButton>
           </div>
-        </div>
-      </section>
         </div>
       </section>
 
@@ -1013,27 +1012,27 @@ const App = () => {
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-[100] bg-white flex flex-col p-12">
+        <div id="mobile-menu" role="dialog" aria-modal="true" aria-label="Mobile navigation menu" className="fixed inset-0 z-[100] bg-white flex flex-col p-12">
           <div className="flex justify-between items-center mb-24">
             <div className="font-condensed text-3xl font-black">ADSYUG</div>
-            <button onClick={() => setIsMenuOpen(false)}>
-              <X size={40} />
+            <button onClick={() => setIsMenuOpen(false)} aria-label="Close navigation menu">
+              <X size={40} aria-hidden="true" />
             </button>
           </div>
-          <div className="flex flex-col gap-8 font-condensed text-6xl font-black uppercase">
+          <nav className="flex flex-col gap-8 font-condensed text-6xl font-black uppercase" role="navigation" aria-label="Mobile navigation">
             <a href="#about" onClick={() => setIsMenuOpen(false)}>
               About
             </a>
             <a href="#unique" onClick={() => setIsMenuOpen(false)}>
-              Unique
+              Features
             </a>
             <a href="#rolling" onClick={() => setIsMenuOpen(false)}>
-              Rolling
+              Insights
             </a>
             <a href="#contact" onClick={() => setIsMenuOpen(false)}>
               Contact
             </a>
-          </div>
+          </nav>
         </div>
       )}
     </div>
