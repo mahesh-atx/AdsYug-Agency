@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Smooth scrolling for navigation */
+html {
+  scroll-behavior: smooth;
+}
+
 /* Global heading letter-spacing */
 h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.03em;

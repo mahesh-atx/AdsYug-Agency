@@ -91,20 +91,31 @@ const App = () => {
   const [galleryRef, galleryVisible] = useScrollAnimation();
   const [faqRef, faqVisible] = useScrollAnimation();
 
+  // Play/pause video based on visibility for performance
+  useEffect(() => {
+    if (videoRef.current) {
+      if (videoSectionVisible) {
+        videoRef.current.play().catch(() => {});
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  }, [videoSectionVisible]);
+
   // Carousel state
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
 
   // Gallery images data - original set
   const galleryImagesBase = [
-    { src: "/asset 10.webp", alt: "Street advertising", caption: "Brand on the Move", location: "Mumbai, Maharashtra" },
-    { src: "/asset 11.webp", alt: "Street advertising", caption: "Urban Impact", location: "Delhi NCR" },
-    { src: "/asset 12.webp", alt: "Street advertising", caption: "Street Presence", location: "Bangalore, Karnataka" },
-    { src: "/asset 13.webp", alt: "Street advertising", caption: "Maximum Visibility", location: "Hyderabad, Telangana" },
-    { src: "/asset 14.webp", alt: "Street advertising", caption: "Rolling Impressions", location: "Chennai, Tamil Nadu" },
-    { src: "/asset 15.webp", alt: "Street advertising", caption: "City Canvas", location: "Pune, Maharashtra" },
-    { src: "/asset 16.webp", alt: "Street advertising", caption: "Traffic Stopper", location: "Kolkata, West Bengal" },
-    { src: "/asset 17.webp", alt: "Street advertising", caption: "Street Level Branding", location: "Ahmedabad, Gujarat" },
+    { src: `${import.meta.env.BASE_URL}asset 10.webp`, alt: "Street advertising", caption: "Brand on the Move", location: "Mumbai, Maharashtra" },
+    { src: `${import.meta.env.BASE_URL}asset 11.webp`, alt: "Street advertising", caption: "Urban Impact", location: "Delhi NCR" },
+    { src: `${import.meta.env.BASE_URL}asset 12.webp`, alt: "Street advertising", caption: "Street Presence", location: "Bangalore, Karnataka" },
+    { src: `${import.meta.env.BASE_URL}asset 13.webp`, alt: "Street advertising", caption: "Maximum Visibility", location: "Hyderabad, Telangana" },
+    { src: `${import.meta.env.BASE_URL}asset 14.webp`, alt: "Street advertising", caption: "Rolling Impressions", location: "Chennai, Tamil Nadu" },
+    { src: `${import.meta.env.BASE_URL}asset 15.webp`, alt: "Street advertising", caption: "City Canvas", location: "Pune, Maharashtra" },
+    { src: `${import.meta.env.BASE_URL}asset 16.webp`, alt: "Street advertising", caption: "Traffic Stopper", location: "Kolkata, West Bengal" },
+    { src: `${import.meta.env.BASE_URL}asset 17.webp`, alt: "Street advertising", caption: "Street Level Branding", location: "Ahmedabad, Gujarat" },
   ];
 
   // Duplicate images for infinite loop effect
@@ -306,6 +317,9 @@ const App = () => {
         </a>
 
         <div className="hidden md:flex gap-10 font-condensed text-lg font-bold tracking-wide" role="menubar">
+          <a href="#" className="hover:line-through transition-all" role="menuitem">
+            HOME
+          </a>
           <a href="#about" className="hover:line-through transition-all" role="menuitem">
             ABOUT
           </a>
@@ -512,7 +526,7 @@ const App = () => {
             <div className="relative h-full border-2 border-[#39FF14]/40 overflow-hidden bg-black">
               {/* The truck image */}
               <img 
-                src="/truck-pre.jpg" 
+                src={`${import.meta.env.BASE_URL}truck-pre.jpg`}
                 alt="AdsYug Mobile Billboard Truck"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
@@ -589,19 +603,43 @@ const App = () => {
           </p>
         </div>
 
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-2 border-black divide-y-2 md:divide-y-0 md:divide-x-2 divide-black scroll-fade ${uniqueVisible ? 'visible' : ''}`} style={{transitionDelay: '0.3s'}}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 scroll-fade ${uniqueVisible ? 'visible' : ''}`} style={{transitionDelay: '0.3s'}}>
           {sections.unique.map((item, idx) => (
             <div
               key={idx}
-              className="p-10 hover:bg-black hover:text-white transition-colors group"
+              className={`group relative p-10 bg-white border-2 border-black hover:bg-black hover:text-white transition-all duration-300 cursor-default hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:z-10 ${idx !== 0 ? 'lg:-ml-[2px]' : ''} ${idx >= 2 ? '-mt-[2px] lg:mt-0' : ''}`}
             >
-              <div className="mb-12">{item.icon}</div>
+              {/* Card number */}
+              <div className="absolute top-4 right-4 font-condensed text-7xl font-black opacity-[0.04] group-hover:opacity-[0.15] transition-all duration-300 select-none">
+                {String(idx + 1).padStart(2, '0')}
+              </div>
+
+              {/* Icon with subtle animation */}
+              <div className="mb-10 relative">
+                <div className="w-14 h-14 border-2 border-black group-hover:border-[#39FF14] rounded-md flex items-center justify-center transition-all duration-300 group-hover:scale-105">
+                  <div className="text-black group-hover:text-[#39FF14] transition-colors duration-300">
+                    {idx === 0 && <Target className="w-7 h-7" />}
+                    {idx === 1 && <Truck className="w-7 h-7" />}
+                    {idx === 2 && <Zap className="w-7 h-7" />}
+                    {idx === 3 && <Eye className="w-7 h-7" />}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Title */}
               <h3 className="font-condensed text-3xl font-bold mb-4 uppercase">
                 {item.title}
               </h3>
-              <p className="text-sm uppercase font-medium opacity-60 leading-snug">
+              
+              {/* Description */}
+              <p className="text-sm uppercase font-medium opacity-60 group-hover:opacity-80 leading-snug transition-opacity duration-300">
                 {item.desc}
               </p>
+              
+              {/* Subtle arrow indicator */}
+              <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-60 transition-all duration-300">
+                <ArrowRight className="w-5 h-5 text-[#39FF14]" />
+              </div>
             </div>
           ))}
         </div>
@@ -610,12 +648,15 @@ const App = () => {
       {/* Full Screen Video Section */}
       <section ref={videoSectionRef} aria-label="Company showreel video" className="relative h-[80vh] bg-black overflow-hidden">
         <video
+          ref={videoRef}
           className="absolute inset-0 w-full h-full object-cover"
-          src="/video-asset.mp4"
-          autoPlay
+          style={{ willChange: 'transform', transform: 'translateZ(0)' }}
+          src={`${import.meta.env.BASE_URL}video-asset.mp4`}
           loop
           muted
           playsInline
+          preload="metadata"
+          poster={`${import.meta.env.BASE_URL}truck-pre.jpg`}
           aria-label="AdsYug promotional video showing mobile billboards in action"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end justify-center pb-16">
@@ -909,104 +950,159 @@ const App = () => {
         </div>
       </section>
 
-      {/* Detailed Footer */}
+      {/* Enhanced Footer */}
       <footer
         id="contact"
-        className="bg-black text-white pt-24 pb-12 px-6 md:px-12"
+        className="bg-black text-white pt-24 pb-12 px-6 md:px-12 relative overflow-hidden"
       >
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-16 mb-24">
+        {/* Animated background gradient */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#39FF14]/10 rounded-full blur-[150px] animate-pulse" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#39FF14]/5 rounded-full blur-[100px]" style={{ animation: 'pulse 4s ease-in-out infinite alternate' }} />
+        </div>
+
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-16 mb-24">
+          {/* Brand Section */}
           <div className="md:col-span-5 space-y-8">
-            <h2 className="font-condensed text-7xl font-black uppercase leading-none tracking-tighter cursor-pointer hover:line-through transition-all">
-              ADSYUG
-            </h2>
-            <p className="text-xl font-light opacity-60 uppercase tracking-widest leading-snug">
+            <MagneticButton strength={0.1}>
+              <h2 className="font-condensed text-7xl font-black uppercase leading-none tracking-tighter cursor-pointer group relative inline-block">
+                <span className="relative z-10 group-hover:text-[#39FF14] transition-colors duration-300">ADSYUG</span>
+                <span className="absolute bottom-0 left-0 w-0 h-2 bg-[#39FF14] group-hover:w-full transition-all duration-500 ease-out" />
+              </h2>
+            </MagneticButton>
+            <p className="text-xl font-light opacity-60 uppercase tracking-widest leading-snug hover:opacity-80 transition-opacity duration-300">
               The premium street-level <br /> advertising partner for <br />{" "}
               brands that demand to be seen.
             </p>
-            <div className="flex gap-4 border-t border-white/20 pt-8">
-              <Instagram className="w-8 h-8 hover:text-zinc-400 transition-colors cursor-pointer" />
-              <Twitter className="w-8 h-8 hover:text-zinc-400 transition-colors cursor-pointer" />
-              <Linkedin className="w-8 h-8 hover:text-zinc-400 transition-colors cursor-pointer" />
+            {/* Enhanced Social Icons */}
+            <div className="flex gap-6 border-t border-white/20 pt-8">
+              <a href="#" className="group relative p-3 border border-white/20 hover:border-[#39FF14] hover:bg-[#39FF14]/10 transition-all duration-300 rounded-full">
+                <Instagram className="w-6 h-6 group-hover:text-[#39FF14] group-hover:scale-110 transition-all duration-300" />
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Instagram</span>
+              </a>
+              <a href="#" className="group relative p-3 border border-white/20 hover:border-[#39FF14] hover:bg-[#39FF14]/10 transition-all duration-300 rounded-full">
+                <Twitter className="w-6 h-6 group-hover:text-[#39FF14] group-hover:scale-110 transition-all duration-300" />
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Twitter</span>
+              </a>
+              <a href="#" className="group relative p-3 border border-white/20 hover:border-[#39FF14] hover:bg-[#39FF14]/10 transition-all duration-300 rounded-full">
+                <Linkedin className="w-6 h-6 group-hover:text-[#39FF14] group-hover:scale-110 transition-all duration-300" />
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">LinkedIn</span>
+              </a>
             </div>
           </div>
 
+          {/* Navigation Column */}
           <div className="md:col-span-2 space-y-4">
-            <h4 className="font-condensed text-2xl font-bold uppercase border-b border-white/20 pb-2">
-              Navigation
+            <h4 className="font-condensed text-2xl font-bold uppercase border-b border-white/20 pb-2 relative group cursor-default">
+              <span className="relative z-10">Navigation</span>
+              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#39FF14] group-hover:w-full transition-all duration-500" />
             </h4>
-            <ul className="space-y-2 uppercase text-sm font-bold opacity-60">
-              <li className="hover:opacity-100 transition-opacity">
-                <a href="#">Home</a>
-              </li>
-              <li className="hover:opacity-100 transition-opacity">
-                <a href="#about">About</a>
-              </li>
-              <li className="hover:opacity-100 transition-opacity">
-                <a href="#unique">Services</a>
-              </li>
-              <li className="hover:opacity-100 transition-opacity">
-                <a href="#rolling">Insights</a>
-              </li>
+            <ul className="space-y-3 uppercase text-sm font-bold">
+              {['Home', 'About', 'Services', 'Insights'].map((item, idx) => (
+                <li key={idx} className="group">
+                  <a 
+                    href={idx === 0 ? '#' : `#${['', 'about', 'unique', 'rolling'][idx]}`}
+                    className="relative inline-flex items-center gap-2 opacity-60 hover:opacity-100 transition-all duration-300"
+                  >
+                    <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-[#39FF14]" />
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">{item}</span>
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
+          {/* Support Column */}
           <div className="md:col-span-2 space-y-4">
-            <h4 className="font-condensed text-2xl font-bold uppercase border-b border-white/20 pb-2">
-              Support
+            <h4 className="font-condensed text-2xl font-bold uppercase border-b border-white/20 pb-2 relative group cursor-default">
+              <span className="relative z-10">Support</span>
+              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#39FF14] group-hover:w-full transition-all duration-500" />
             </h4>
-            <ul className="space-y-2 uppercase text-sm font-bold opacity-60">
-              <li className="hover:opacity-100 transition-opacity">
-                <a href="#">Client Portal</a>
-              </li>
-              <li className="hover:opacity-100 transition-opacity">
-                <a href="#">Help Center</a>
-              </li>
-              <li className="hover:opacity-100 transition-opacity">
-                <a href="#">Pricing</a>
-              </li>
-              <li className="hover:opacity-100 transition-opacity">
-                <a href="#">Contact</a>
-              </li>
+            <ul className="space-y-3 uppercase text-sm font-bold">
+              {['Client Portal', 'Help Center', 'Pricing', 'Contact'].map((item, idx) => (
+                <li key={idx} className="group">
+                  <a 
+                    href="#"
+                    className="relative inline-flex items-center gap-2 opacity-60 hover:opacity-100 transition-all duration-300"
+                  >
+                    <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-[#39FF14]" />
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">{item}</span>
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
+          {/* Newsletter Section */}
           <div className="md:col-span-3 space-y-4">
-            <h4 className="font-condensed text-2xl font-bold uppercase border-b border-white/20 pb-2">
-              Newsletter
+            <h4 className="font-condensed text-2xl font-bold uppercase border-b border-white/20 pb-2 relative group cursor-default">
+              <span className="relative z-10">Newsletter</span>
+              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#39FF14] group-hover:w-full transition-all duration-500" />
             </h4>
             <p className="text-sm uppercase font-bold opacity-60 mb-4 tracking-tighter">
               Get the latest urban insights.
             </p>
-            <div className="flex border-2 border-white">
-              <input
-                type="text"
-                placeholder="EMAIL@DOMAIN.COM"
-                className="bg-transparent px-4 py-2 w-full focus:outline-none font-condensed uppercase font-bold text-sm"
-              />
-              <MagneticButton strength={0.4}>
-                <button className="bg-white text-black px-4 py-2 hover:bg-zinc-200 transition-colors">
-                  <ArrowRight size={20} />
-                </button>
-              </MagneticButton>
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#39FF14]/20 to-transparent opacity-0 group-hover:opacity-100 blur transition-opacity duration-500" />
+              <div className="relative flex border-2 border-white group-hover:border-[#39FF14] transition-colors duration-300">
+                <input
+                  type="email"
+                  placeholder="EMAIL@DOMAIN.COM"
+                  className="bg-transparent px-4 py-3 w-full focus:outline-none font-condensed uppercase font-bold text-sm placeholder:text-white/40 focus:placeholder:text-white/60 transition-colors"
+                />
+                <MagneticButton strength={0.4}>
+                  <button className="bg-white text-black px-5 py-3 hover:bg-[#39FF14] transition-all duration-300 group/btn">
+                    <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform duration-300" />
+                  </button>
+                </MagneticButton>
+              </div>
+            </div>
+            {/* Trust badges */}
+            <div className="flex items-center gap-4 mt-6 opacity-40">
+              <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider">
+                <div className="w-2 h-2 bg-[#39FF14] rounded-full animate-pulse" />
+                <span>No Spam</span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider">
+                <div className="w-2 h-2 bg-[#39FF14] rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
+                <span>Weekly Updates</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-12 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="text-xs font-bold uppercase opacity-40 tracking-[0.2em]">
-            © 2024 ADSYUG ADVERTISING. ALL RIGHTS RESERVED.
+        {/* Bottom Bar */}
+        <div className="relative z-10 border-t border-white/10 pt-12 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="text-xs font-bold uppercase opacity-40 tracking-[0.2em] hover:opacity-60 transition-opacity">
+            © {new Date().getFullYear()} ADSYUG ADVERTISING. ALL RIGHTS RESERVED.
           </div>
-          <div className="flex gap-8 text-xs font-bold uppercase opacity-40 tracking-[0.2em]">
-            <span className="cursor-pointer hover:opacity-100 transition-opacity">
-              Privacy Policy
-            </span>
-            <span className="cursor-pointer hover:opacity-100 transition-opacity">
-              Terms of Service
-            </span>
-            <span className="cursor-pointer hover:opacity-100 transition-opacity">
-              Cookies
-            </span>
+          <div className="flex gap-8 text-xs font-bold uppercase tracking-[0.2em]">
+            {['Privacy Policy', 'Terms of Service', 'Cookies'].map((item, idx) => (
+              <a 
+                key={idx}
+                href="#"
+                className="relative opacity-40 hover:opacity-100 transition-opacity duration-300 group"
+              >
+                {item}
+                <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#39FF14] group-hover:w-full transition-all duration-300" />
+              </a>
+            ))}
           </div>
+        </div>
+
+        {/* Scroll to top button */}
+        <div className="absolute bottom-12 right-12 hidden md:block">
+          <MagneticButton strength={0.3}>
+            <button 
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="w-14 h-14 border-2 border-white/20 hover:border-[#39FF14] hover:bg-[#39FF14]/10 rounded-full flex items-center justify-center group transition-all duration-300"
+              aria-label="Scroll to top"
+            >
+              <svg className="w-5 h-5 group-hover:text-[#39FF14] group-hover:-translate-y-1 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+            </button>
+          </MagneticButton>
         </div>
       </footer>
 
